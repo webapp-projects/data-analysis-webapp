@@ -20,6 +20,7 @@ public class DataLoader implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        System.out.println("Started database initialization...");
         for (RawData data : rawDataRepository.findAll()) {
             if (data.getIndicator().equals("SUICIDE")) {
                 SuicideRate suicideRate = new SuicideRate();
@@ -63,7 +64,7 @@ public class DataLoader implements ApplicationRunner {
                 alcoholConsumption.setSubject(Subject.valueOf(data.getSubject()));
                 alcoholConsumptionRepository.save(alcoholConsumption);
             }
-
         }
+        System.out.println("Database initialized!");
     }
 }
