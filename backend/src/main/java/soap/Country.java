@@ -5,6 +5,8 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
+import lombok.Getter;
+import lombok.Setter;
 
 
 /**
@@ -28,35 +30,19 @@ import jakarta.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "country", namespace = "http://localhost/integration", propOrder = {
-    "code"
+    "code", "avgSuicideRate", "avgAlcoholConsumption"
 })
+@Getter
+@Setter
 public class Country {
 
     @XmlElement(namespace = "http://localhost/integration", required = true)
     protected String code;
 
-    /**
-     * Gets the value of the code property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getCode() {
-        return code;
-    }
+    @XmlElement(namespace = "http://localhost/integration")
+    protected float avgSuicideRate;
 
-    /**
-     * Sets the value of the code property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setCode(String value) {
-        this.code = value;
-    }
+    @XmlElement(namespace = "http://localhost/integration")
+    protected float avgAlcoholConsumption;
 
 }

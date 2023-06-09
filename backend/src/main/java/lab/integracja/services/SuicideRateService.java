@@ -18,4 +18,8 @@ public class SuicideRateService {
         return suicideRateRepository.findAllByTimeAndSubjectOrderByTime(year, subject);
     }
 
+    public float avgSuicideRateForCountry(Long id) {
+        return suicideRateRepository.avgSuicideRateForCountry(id);
+    }
+
 }

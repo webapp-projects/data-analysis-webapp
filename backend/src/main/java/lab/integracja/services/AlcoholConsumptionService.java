@@ -10,4 +10,8 @@ public class AlcoholConsumptionService {
 
     private final AlcoholConsumptionRepository alcoholRepository;
 
+    public float avgSuicideRateForCountry(Long id) {
+        return alcoholRepository.avgAlcoholConsumptionForCountry(id);
+    }
+
 }

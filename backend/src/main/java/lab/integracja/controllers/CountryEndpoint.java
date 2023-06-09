@@ -1,7 +1,11 @@
 package lab.integracja.controllers;
 
+import jakarta.xml.ws.WebServiceException;
 import lab.integracja.entities.Country;
 import lab.integracja.repositories.CountryRepository;
+import lab.integracja.repositories.SuicideRateRepository;
+import lab.integracja.services.AlcoholConsumptionService;
+import lab.integracja.services.SuicideRateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
@@ -18,17 +22,24 @@ public class CountryEndpoint {
     private static final String NAMESPACE_URI = "http://localhost/integration";
 
     private final CountryRepository countryRepository;
+    private final SuicideRateService suicideRateService;
+    private final AlcoholConsumptionService alcoholConsumptionService;
 
     @PayloadRoot(namespace = NAMESPACE_URI, localPart = "getCountryRequest")
     @ResponsePayload
     public GetCountryResponse getCountry(@RequestPayload GetCountryRequest request) {
-        GetCountryResponse response = new GetCountryResponse();
         Optional<Country> country = countryRepository.findByCode(request.getName());
         if (country.isEmpty()) {
-            return null;
+            throw new WebServiceException("Country not found");
         }
+
+        GetCountryResponse response = new GetCountryResponse();
         soap.Country c = new soap.Country();
         c.setCode(country.get().getCode());
+
+        c.setAvgSuicideRate(suicideRateService.avgSuicideRateForCountry(country.get().getId()));
+        c.setAvgAlcoholConsumption(alcoholConsumptionService.avgSuicideRateForCountry(country.get().getId()));
+
         response.setCountry(c);
 
         return response;
