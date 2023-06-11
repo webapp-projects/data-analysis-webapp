@@ -22,4 +22,7 @@ public class SuicideRateService {
         return suicideRateRepository.avgSuicideRateForCountry(id);
     }
 
+    public List<SuicideRate> getByCountryAndSubject(String countryCode, Subject subject) {
+        return suicideRateRepository.findAllByCountry_CodeAndSubjectOrderByTime(countryCode, subject);
+    }
 }

@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>lab</groupId>
-	<artifactId>integracja</artifactId>
+	<artifactId>backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>integracja</name>
-	<description>Integracja systemów</description>
+	<name>backend</name>
+	<description>System integration</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -96,26 +96,6 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jaxb2-maven-plugin</artifactId>
-				<version>3.1.0</version>
-				<executions>
-					<execution>
-						<id>xjc</id>
-						<goals>
-							<goal>xjc</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<sources>
-						<schemaDirectory>${project.basedir}/src/main/resources/</schemaDirectory>
-						<outputDirectory>${project.basedir}/src/main/java/lab</outputDirectory>
-						<clearOutputDir>false</clearOutputDir>
-					</sources>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 

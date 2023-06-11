@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface SuicideRateRepository extends JpaRepository<SuicideRate, Long> {
     List<SuicideRate> findAllByTimeAndSubjectOrderByTime(int time, Subject subject);
+    List<SuicideRate> findAllByCountry_CodeAndSubjectOrderByTime(String countryCode, Subject subject);
 
     @Query("select avg(value) " +
             "from SuicideRate " +
