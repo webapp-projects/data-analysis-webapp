@@ -2,7 +2,7 @@ package lab.integracja.controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lab.integracja.repositories.RawDataRepository;
-import lab.integracja.utils.CsvFileGenerator;
+import lab.integracja.utils.CsvUtils;
 import lab.integracja.utils.XMLFileGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,14 +17,14 @@ import java.io.IOException;
 public class RawDataController {
 
     private final RawDataRepository rawDataRepository;
-    private final CsvFileGenerator csvFileGenerator;
+    private final CsvUtils csvUtils;
     private final XMLFileGenerator xmlFileGenerator;
 
     @GetMapping("/csv")
     public void exportIntoCsv(HttpServletResponse response) throws IOException {
         response.setContentType("text/csv");
         response.addHeader("Content-Disposition", "attachment; filename=\"raw_data.csv\"");
-        csvFileGenerator.writeRawDataToCsv(rawDataRepository.findAll().subList(0, 100), response.getWriter());
+        csvUtils.writeRawDataToCsv(rawDataRepository.findAll().subList(0, 100), response.getWriter());
     }
 
     @GetMapping("/xml")
