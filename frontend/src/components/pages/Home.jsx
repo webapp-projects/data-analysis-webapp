@@ -6,18 +6,30 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, parseISO } from 'date-fns';
 
 export const Home = () => {
+  const countries = ['ARG', 'AUT', 'BEL', 'BGR', 'BRA', 'CAN', 'CHE', 'CHL', 'CHN', 'COL', 'CRI', 'CZE', 'DEU', 'DNK', 'ESP', 'EST', 'FIN', 'FRA', 'GBR', 'GRC', 'HRV', 'HUN', 'IDN', 'IND', 'IRL', 'ISL', 'ISR', 'ITA', 'JPN', 'KOR', 'LTU', 'LUX', 'LVA', 'MEX', 'NLD', 'NOR', 'NZL', 'PER', 'POL', 'PRT', 'ROU', 'RUS', 'SVK', 'SVN', 'SWE', 'TUR', 'USA', 'ZAF'];
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.reload();
   };
 
-  let endpoints = ['http://localhost:8080/api/suicide/country/POL?subject=TOT', 'http://localhost:8080/api/alcohol/country/POL?subject=TOT'];
+  const handleCountryChange = (e) => {
+    setCountry(e.target.value);
+  };
 
-  const [isLoading, setIsLoading] = useState();
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
+  };
+
+  const [isLoading, setIsLoading] = useState(true);
   const [suicideData, setSuicideData] = useState();
   const [alcoholData, setAlcoholData] = useState();
+  const [country, setCountry] = useState('POL');
+  const [filter, setFilter] = useState('TOT');
 
   useEffect(() => {
+    let endpoints = [`http://localhost:8080/api/suicide/country/${country}?subject=${filter}`, `http://localhost:8080/api/alcohol/country/${country}?subject=TOT`];
+
     const headers = addTokenToRequestHeader();
 
     const fetchData = async () => {
@@ -30,13 +42,14 @@ export const Home = () => {
         const responseData = await Promise.all(dataPromises);
         setSuicideData(responseData[0]);
         setAlcoholData(responseData[1]);
+        setIsLoading(false);
       } catch (error) {
         console.log(error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [country, filter]);
 
   let transformedSuicidesArray = [];
   let transformedAlcoholArray = [];
@@ -90,6 +103,18 @@ export const Home = () => {
           </div>
         </ul>
       </div>
+      <select className="select mt-4  w-24 mr-4 max-w-xs border-2 border-sky-600/30 bg-gray-50 text-sky-800/50" onChange={handleCountryChange} defaultValue="POL">
+        <option disabled>Choose country</option>
+        {countries.map((country) => {
+          return <option key={country}>{country}</option>;
+        })}
+      </select>
+      <select className="select mt-4 w-24 max-w-xs border-2 border-sky-600/30 bg-gray-50  text-sky-800/50" onChange={handleFilterChange} defaultValue="TOT">
+        <option disabled>Choose filter</option>
+        <option>TOT</option>
+        <option>WOMEN</option>
+        <option>MEN</option>
+      </select>
       <div className="flex w-full h-auto gap-5 mt-9">
         <div className="bg-gray-100 rounded-xl h-auto w-full   flex justify-center items-center py-20">
           <ResponsiveContainer width="100%" aspect={6.5 / 3.0} maxHeight={300}>
