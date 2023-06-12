@@ -1,5 +1,6 @@
 package lab.integracja.services;
 
+import lab.integracja.entities.AlcoholConsumption;
 import lab.integracja.entities.Subject;
 import lab.integracja.entities.SuicideRate;
 import lab.integracja.repositories.AlcoholConsumptionRepository;
@@ -18,11 +19,11 @@ public class AlcoholConsumptionService {
         return alcoholRepository.avgAlcoholConsumptionForCountry(id);
     }
 
-    public List<SuicideRate> getBySubjectAndYear(int year, Subject subject) {
+    public List<AlcoholConsumption> getBySubjectAndYear(int year, Subject subject) {
         return alcoholRepository.findAllByTimeAndSubjectOrderByTime(year, subject);
     }
 
-    public List<SuicideRate> getByCountryAndSubject(String countryCode, Subject subject) {
+    public List<AlcoholConsumption> getByCountryAndSubject(String countryCode, Subject subject) {
         return alcoholRepository.findAllByCountry_CodeAndSubjectOrderByTime(countryCode, subject);
     }
 

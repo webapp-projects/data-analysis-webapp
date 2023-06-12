@@ -18,7 +18,7 @@ public interface AlcoholConsumptionRepository extends JpaRepository<AlcoholConsu
             "and subject = lab.integracja.entities.Subject.TOT")
     float avgAlcoholConsumptionForCountry(@Param("countryId") Long countryId);
 
-    List<SuicideRate> findAllByTimeAndSubjectOrderByTime(int year, Subject subject);
+    List<AlcoholConsumption> findAllByTimeAndSubjectOrderByTime(int year, Subject subject);
 
-    List<SuicideRate> findAllByCountry_CodeAndSubjectOrderByTime(String countryCode, Subject subject);
+    List<AlcoholConsumption> findAllByCountry_CodeAndSubjectOrderByTime(String countryCode, Subject subject);
 }

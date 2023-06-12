@@ -1,5 +1,6 @@
 package lab.integracja.controllers;
 
+import lab.integracja.entities.AlcoholConsumption;
 import lab.integracja.entities.Subject;
 import lab.integracja.entities.SuicideRate;
 import lab.integracja.services.AlcoholConsumptionService;
@@ -21,13 +22,13 @@ public class AlcoholConsumptionController {
     private final CountryService countryService;
 
     @GetMapping("/year/{year}/subject/{subject}")
-    public ResponseEntity<List<SuicideRate>> getByYearAndSubject(@PathVariable Integer year,
-                                                                 @PathVariable String subject) {
+    public ResponseEntity<List<AlcoholConsumption>> getByYearAndSubject(@PathVariable Integer year,
+                                                                        @PathVariable String subject) {
         return ResponseEntity.ok(alcoholConsumptionService.getBySubjectAndYear(year, Subject.valueOf(subject)));
     }
 
     @GetMapping("/country/{countryCode}")
-    public ResponseEntity<List<SuicideRate>> getByCountry(@PathVariable String countryCode,
+    public ResponseEntity<List<AlcoholConsumption>> getByCountry(@PathVariable String countryCode,
                                                           @RequestParam(defaultValue = "TOT") String subject) {
 
         if (countryService.isValidCountryCode(countryCode) && EnumUtils.isStringInEnum(subject, Subject.class))
