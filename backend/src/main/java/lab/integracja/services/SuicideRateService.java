@@ -5,11 +5,14 @@ import lab.integracja.entities.SuicideRate;
 import lab.integracja.repositories.SuicideRateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(isolation = Isolation.SERIALIZABLE)
 public class SuicideRateService {
 
     private final SuicideRateRepository suicideRateRepository;
