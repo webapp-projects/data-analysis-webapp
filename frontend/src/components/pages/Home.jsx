@@ -26,6 +26,8 @@ export const Home = () => {
   const [alcoholData, setAlcoholData] = useState();
   const [country, setCountry] = useState('POL');
   const [filter, setFilter] = useState('TOT');
+  const [maxAlcoholValue, setMaxAlcoholValue] = useState();
+  const [maxSuicidesValue, setMaxSuicidesValue] = useState();
 
   useEffect(() => {
     let endpoints = [`http://localhost:8080/api/suicide/country/${country}?subject=${filter}`, `http://localhost:8080/api/alcohol/country/${country}?subject=TOT`];
@@ -42,6 +44,17 @@ export const Home = () => {
         const responseData = await Promise.all(dataPromises);
         setSuicideData(responseData[0]);
         setAlcoholData(responseData[1]);
+
+        if (responseData[0]) {
+          const maxSuicidesValue = Math.max(...responseData[1].map((obj) => obj.value));
+          setMaxSuicidesValue(maxSuicidesValue);
+        }
+
+        if (responseData[1]) {
+          const maxAlcoholValue = Math.max(...responseData[1].map((obj) => obj.value));
+          setMaxAlcoholValue(maxAlcoholValue);
+        }
+
         setIsLoading(false);
       } catch (error) {
         console.log(error);
@@ -109,7 +122,7 @@ export const Home = () => {
           return <option key={country}>{country}</option>;
         })}
       </select>
-      <select className="select mt-4 w-24 max-w-xs border-2 border-sky-600/30 bg-gray-50  text-sky-800/50" onChange={handleFilterChange} defaultValue="TOT">
+      <select className="select mt-4 w-24 max-w-xs border-2 border-sky-600/30 bg-gray-50  text-sky-800/50 " onChange={handleFilterChange} defaultValue="TOT">
         <option disabled>Choose filter</option>
         <option>TOT</option>
         <option>WOMEN</option>
@@ -135,7 +148,7 @@ export const Home = () => {
 
               <XAxis dy={4} dataKey="time" axisLine={false} tickLine={false} />
 
-              <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} />
+              <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, Math.max(maxSuicidesValue, maxAlcoholValue)]} />
 
               <Tooltip />
 
