@@ -1,7 +1,7 @@
 package lab.integracja.controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
-import lab.integracja.services.CountryService;
+import lab.integracja.repositories.RawDataRepository;
 import lab.integracja.utils.CsvFileGenerator;
 import lab.integracja.utils.XMLFileGenerator;
 import lombok.RequiredArgsConstructor;
@@ -13,24 +13,24 @@ import java.io.IOException;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api/countries")
-public class CountryController {
+@RequestMapping("/api/raw-data")
+public class RawDataController {
 
-    private final CountryService countryService;
+    private final RawDataRepository rawDataRepository;
     private final CsvFileGenerator csvFileGenerator;
     private final XMLFileGenerator xmlFileGenerator;
 
     @GetMapping("/csv")
     public void exportIntoCsv(HttpServletResponse response) throws IOException {
         response.setContentType("text/csv");
-        response.addHeader("Content-Disposition", "attachment; filename=\"countries.csv\"");
-        csvFileGenerator.writeCountriesToCsv(countryService.getAll(), response.getWriter());
+        response.addHeader("Content-Disposition", "attachment; filename=\"raw_data.csv\"");
+        csvFileGenerator.writeRawDataToCsv(rawDataRepository.findAll().subList(0, 100), response.getWriter());
     }
 
     @GetMapping("/xml")
     public void exportToXML(HttpServletResponse response) throws IOException {
         response.setContentType("text/xml");
-        response.addHeader("Content-Disposition", "attachment; filename=\"countries.xml\"");
-        xmlFileGenerator.writeCountriesToXML(countryService.getAll(), response.getWriter());
+        response.addHeader("Content-Disposition", "attachment; filename=\"raw_data.xml\"");
+        xmlFileGenerator.writeRawDataToXML(rawDataRepository.findAll().subList(0, 100), response.getWriter());
     }
 }

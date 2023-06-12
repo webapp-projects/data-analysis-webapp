@@ -1,6 +1,7 @@
 package lab.integracja.utils;
 
 import lab.integracja.entities.Country;
+import lab.integracja.entities.RawData;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,18 @@ public class CsvFileGenerator {
                 printer.printRecord(country.getId(), country.getCode());
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+    }
+
+    public void writeRawDataToCsv(List<RawData> rawDataList, Writer writer) {
+        try {
+            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT);
+            for (RawData rawData : rawDataList) {
+                printer.printRecord(rawData.getTime(), rawData.getIndicator(), rawData.getValue(), rawData.getSubject());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
