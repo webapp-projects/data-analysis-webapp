@@ -1,3 +1,16 @@
+create table if not exists raw_data (
+  rate float(24),
+  year_date integer,
+  id bigint AUTO_INCREMENT,
+  flag_codes varchar(255),
+  frequency varchar(255),
+  indicator varchar(255),
+  location varchar(255),
+  measure varchar(255),
+  subject varchar(255),
+  primary key (id)
+);
+
 INSERT INTO raw_data(LOCATION,INDICATOR,SUBJECT,MEASURE,FREQUENCY,year_date,rate,Flag_Codes) VALUES ('AUS','SUICIDE','TOT','100000PER','A',1960,13.6,NULL);
 INSERT INTO raw_data(LOCATION,INDICATOR,SUBJECT,MEASURE,FREQUENCY,year_date,rate,Flag_Codes) VALUES ('AUS','SUICIDE','TOT','100000PER','A',1961,15,NULL);
 INSERT INTO raw_data(LOCATION,INDICATOR,SUBJECT,MEASURE,FREQUENCY,year_date,rate,Flag_Codes) VALUES ('AUS','SUICIDE','TOT','100000PER','A',1962,17.4,NULL);

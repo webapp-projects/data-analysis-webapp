@@ -1,0 +1,67 @@
+version: '3.7'
+
+# Define services
+services:
+  # App backend service
+  app-server:
+    # Configuration for building the docker image for the backend service
+    build:
+      context: backend # Use an image built from the specified dockerfile in the `polling-app-server` directory.
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080" # Forward the exposed port 8080 on the container to port 8080 on the host machine
+    restart: always
+    depends_on:
+      - db # This service depends on mysql. Start that first.
+    environment: # Pass environment variables to the service
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/integracja
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.MySQLDialect
+      SPRING_DATASOURCE_DRIVERCLASSNAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL-AUTO: update
+      SPRING_DATASOURCE_INITIALIZATION-MODE: always
+      SPRING_DATASOURCE_DATA: file:/app/src/main/resources/data.sql
+    networks: # Networks to join (Services on the same network can communicate with each other using their name)
+      - backend
+      - frontend
+
+  # Frontend Service 
+#  app-client:
+#    build:
+#      context: polling-app-client # Use an image built from the specified dockerfile in the `polling-app-client` directory.
+#      dockerfile: Dockerfile
+#      args:
+#        REACT_APP_API_BASE_URL: http://127.0.0.1:8080/api
+#    ports:
+#      - "9090:80" # Map the exposed port 80 on the container to port 9090 on the host machine
+#    restart: always
+#    depends_on:
+#      - app-server
+#    networks:
+#      - frontend  
+
+  # Database Service (Mysql)
+  db:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: integracja
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - "./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/1.sql"
+    networks:
+      - backend
+
+# Volumes
+volumes:
+  db-data:
+
+# Networks to be created to facilitate communication between containers
+networks:
+  backend:
+  frontend:
