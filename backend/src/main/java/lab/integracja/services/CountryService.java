@@ -5,6 +5,8 @@ import lab.integracja.repositories.CountryRepository;
 import lab.integracja.utils.CsvUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(isolation = Isolation.SERIALIZABLE)
 public class CountryService {
 
     private final CountryRepository countryRepository;
