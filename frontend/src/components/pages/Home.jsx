@@ -2,11 +2,20 @@ import React from 'react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { addTokenToRequestHeader } from '../../helpers/addTokenToRequestHeader';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format, parseISO } from 'date-fns';
 
 export const Home = () => {
-  const countries = ['ARG', 'AUT', 'BEL', 'BGR', 'BRA', 'CAN', 'CHE', 'CHL', 'CHN', 'COL', 'CRI', 'CZE', 'DEU', 'DNK', 'ESP', 'EST', 'FIN', 'FRA', 'GBR', 'GRC', 'HRV', 'HUN', 'IDN', 'IND', 'IRL', 'ISL', 'ISR', 'ITA', 'JPN', 'KOR', 'LTU', 'LUX', 'LVA', 'MEX', 'NLD', 'NOR', 'NZL', 'PER', 'POL', 'PRT', 'ROU', 'RUS', 'SVK', 'SVN', 'SWE', 'TUR', 'USA', 'ZAF'];
+  const countries = ['ARG', 'AUT', 'BEL', 'BGR', 'BRA', 'CAN', 'CHE', 'CHL', 'COL', 'CRI', 'CZE', 'DEU', 'DNK', 'ESP', 'EST', 'FIN', 'FRA', 'GBR', 'GRC', 'HRV', 'HUN', 'IRL', 'ISL', 'ISR', 'ITA', 'JPN', 'KOR', 'LTU', 'LUX', 'LVA', 'MEX', 'NLD', 'NOR', 'NZL', 'PER', 'POL', 'PRT', 'ROU', 'RUS', 'SVK', 'SVN', 'SWE', 'TUR', 'USA', 'ZAF'];
+  const [isLoading, setIsLoading] = useState(true);
+  const [suicideData, setSuicideData] = useState();
+  const [alcoholData, setAlcoholData] = useState();
+  const [country, setCountry] = useState('POL');
+  const [filter, setFilter] = useState('TOT');
+  const [maxAlcoholValue, setMaxAlcoholValue] = useState();
+  const [maxSuicidesValue, setMaxSuicidesValue] = useState();
+  const [xmlExportData, setXmlExportData] = useState('Raw Data');
+  const [csvExportData, setCsvExportData] = useState('Raw Data');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -21,13 +30,55 @@ export const Home = () => {
     setFilter(e.target.value);
   };
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [suicideData, setSuicideData] = useState();
-  const [alcoholData, setAlcoholData] = useState();
-  const [country, setCountry] = useState('POL');
-  const [filter, setFilter] = useState('TOT');
-  const [maxAlcoholValue, setMaxAlcoholValue] = useState();
-  const [maxSuicidesValue, setMaxSuicidesValue] = useState();
+  const handleXmlExportDataChange = (e) => {
+    setXmlExportData(e.target.value);
+  };
+
+  const handleXmlDownload = () => {
+    let endpoint = '';
+    let name = '';
+    if (xmlExportData === 'Raw Data') {
+      endpoint = 'http://localhost:8080/api/raw-data/xml';
+      name = 'raw_data.xml';
+    } else {
+      endpoint = 'http://localhost:8080/api/countries/xml';
+      name = 'countries.xml';
+    }
+
+    fetch(endpoint)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = name;
+        downloadLink.click();
+      });
+  };
+
+  const handleCsvExportDataChange = (e) => {
+    setCsvExportData(e.target.value);
+  };
+
+  const handleCsvDownload = () => {
+    let endpoint = '';
+    let name = '';
+    if (csvExportData === 'Raw Data') {
+      endpoint = 'http://localhost:8080/api/raw-data/csv';
+      name = 'raw_data.csv';
+    } else {
+      endpoint = 'http://localhost:8080/api/countries/csv';
+      name = 'countries.csv';
+    }
+
+    fetch(endpoint)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = name;
+        downloadLink.click();
+      });
+  };
 
   useEffect(() => {
     let endpoints = [`http://localhost:8080/api/suicide/country/${country}?subject=${filter}`, `http://localhost:8080/api/alcohol/country/${country}?subject=TOT`];
@@ -94,12 +145,16 @@ export const Home = () => {
     };
   });
 
+  if (isLoading) {
+    return <div className="text-6xl font-bold text-gray-800/40">Loading data...</div>;
+  }
+
   return (
-    <div className="h-screen bg-gray-50 px-4 py-6">
+    <div className="h-auto min-h-screen bg-gray-50 px-4 py-6">
       <div className="flex justify-between items-center">
         <div>
-          <div className="text-2xl text-sky-500 font-semibold">Data Analysis</div>
-          <p className="flex w-full justify-center text-xl text-gray-800">Alcohol usage and sucide rate correlation analysis</p>
+          <p className="flex w-full justify-center text-2xl text-sky-500 font-semibold">Alcohol usage and sucide rate</p>
+          <p className=" w-full text-xl text-sky-950 font-semibold">Correlation analysis</p>
         </div>
         <ul className="menu menu-horizontal px-1">
           <div className="dropdown-end dropdown">
@@ -116,21 +171,24 @@ export const Home = () => {
           </div>
         </ul>
       </div>
-      <select className="select mt-4  w-24 mr-4 max-w-xs border-2 border-sky-600/30 bg-gray-50 text-sky-800/50" onChange={handleCountryChange} defaultValue="POL">
-        <option disabled>Choose country</option>
-        {countries.map((country) => {
-          return <option key={country}>{country}</option>;
-        })}
-      </select>
-      <select className="select mt-4 w-24 max-w-xs border-2 border-sky-600/30 bg-gray-50  text-sky-800/50 " onChange={handleFilterChange} defaultValue="TOT">
-        <option disabled>Choose filter</option>
-        <option>TOT</option>
-        <option>WOMEN</option>
-        <option>MEN</option>
-      </select>
-      <div className="flex w-full h-auto gap-5 mt-9">
-        <div className="bg-gray-100 rounded-xl h-auto w-full   flex justify-center items-center py-20">
-          <ResponsiveContainer width="100%" aspect={6.5 / 3.0} maxHeight={300}>
+      <div className="flex items-center gap-5 mt-4">
+        <select className="select w-24  max-w-xs border-2 border-gray-600/10 bg-gray-50 text-gray-700" onChange={handleCountryChange} defaultValue="POL">
+          <option disabled>Choose country</option>
+          {countries.map((country) => {
+            return <option key={country}>{country}</option>;
+          })}
+        </select>
+        <select className="select  w-24 max-w-xs border-2 border-gray-600/10 bg-gray-50 text-gray-700 " onChange={handleFilterChange} defaultValue="TOT">
+          <option disabled>Choose filter</option>
+          <option>TOT</option>
+          <option>WOMEN</option>
+          <option>MEN</option>
+        </select>
+      </div>
+
+      <div className="flex w-full h-full gap-5 mt-5">
+        <div className="bg-gray-100 rounded-xl h-auto w-full   flex justify-center items-center py-12">
+          <ResponsiveContainer width="100%" aspect={6.5 / 3.0} maxHeight={450}>
             <AreaChart data={data} margin={{ right: 20, left: 0 }}>
               <defs>
                 <linearGradient id="colorSuicide" x1="0" y1="0" x2="0" y2="1">
@@ -143,25 +201,56 @@ export const Home = () => {
                 </linearGradient>
               </defs>
 
-              <Area type="monotone" dataKey="suicideValue" stroke="#0ea5e9" strokeWidth={3.5} fillOpacity={1} fill="url(#colorSuicide)" />
-              <Area type="monotone" dataKey="alcoholValue" stroke="#3b82f6" strokeWidth={3.5} fillOpacity={1} fill="url(#colorAlcohol)" />
+              <Area type="monotone" name="Suicides " dataKey="suicideValue" stroke="#0ea5e9" strokeWidth={3.5} fillOpacity={1} fill="url(#colorSuicide)" />
+              <Area type="monotone" name="Alcohol Usage" dataKey="alcoholValue" stroke="#3b82f6" strokeWidth={3.5} fillOpacity={1} fill="url(#colorAlcohol)" />
 
-              <XAxis dy={4} dataKey="time" axisLine={false} tickLine={false} />
+              <XAxis dy={7} dataKey="time" axisLine={false} tickLine={false} />
 
-              <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, Math.max(maxSuicidesValue, maxAlcoholValue)]} />
+              {/* for relative y axis:  */}
+              {/* <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, Math.max(maxSuicidesValue, maxAlcoholValue)]} /> */}
+
+              {/* for nonrelative y axis: */}
+              <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, 50]} />
 
               <Tooltip />
 
-              <CartesianGrid opacity={0.2} strokeWidth={2} vertical={false} />
+              <Legend dy={20} wrapperStyle={{ position: 'relative', marginTop: '2px' }} />
+
+              <CartesianGrid opacity={0.4} strokeWidth={2} vertical={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
-      <button className="btn border-sky-500 border-2 text-sky-500 bg-gray-50  mt-9 mr-4 hover:bg-sky-600 hover:text-sky-50 hover:border-sky-600 ">Export countries CSV</button>
-      <button className="btn border-sky-500 border-2 text-sky-500 bg-gray-50  mt-9 mr-4 hover:bg-sky-600 hover:text-sky-50 hover:border-sky-600 ">Export countries XML</button>
-      <button className="btn border-sky-500 border-2 text-sky-500 bg-gray-50  mt-9 mr-4 hover:bg-sky-600 hover:text-sky-50 hover:border-sky-600 ">Export raw data CSV</button>
-      <button className="btn border-sky-500 border-2 text-sky-500 bg-gray-50  mt-9 mr-4 hover:bg-sky-600 hover:text-sky-50 hover:border-sky-600 ">Export raw data XML</button>
-      <input type="file" className="file-input  file-input-ghost bg-gray-50 border-2 border-sky-500 text-sky-500 hover:bg-sky-600 hover:text-sky-50 w-full max-w-xs" />
+      <div className="flex flex-col items-center gap-5">
+        <h1 className="text-xl font-semibold text-gray-600 mt-7 mb-3">Export data</h1>
+        <div className="flex items-center gap-5">
+          <p className="text-gray-700 text-md">XML:</p>
+          <select className="select  border-2 border-sky-600/30 bg-gray-50 text-gray-700 " defaultValue="Raw Data" onChange={handleXmlExportDataChange}>
+            <option disabled>Choose filter</option>
+            <option>Raw Data</option>
+            <option>Contries</option>
+          </select>
+          <button className="btn  bg-sky-500 text-sky-50 hover:bg-sky-600 border-0" onClick={handleXmlDownload}>
+            Export
+          </button>
+        </div>
+        <div className="flex items-center gap-5">
+          <p className="text-gray-700 text-md">CSV:</p>
+          <select className="select  border-2 border-sky-600/30 bg-gray-50 text-gray-700 " defaultValue="Raw Data" onChange={handleCsvExportDataChange}>
+            <option disabled>Choose filter</option>
+            <option>Raw Data</option>
+            <option>Contries</option>
+          </select>
+          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0" onClick={handleCsvDownload}>
+            Export
+          </button>
+        </div>
+        <h1 className="text-xl font-semibold text-gray-600 mt-3">Import data</h1>
+        <div className="flex items-center gap-5">
+          <p className="text-gray-700 text-md">CSV:</p>
+          <input type="file" className="file-input  file-input-ghost border-2 border-sky-600/30 bg-gray-50 text-gray-700 cursor-pointer  w-full max-w-xs" />
+        </div>
+      </div>
     </div>
   );
 };
