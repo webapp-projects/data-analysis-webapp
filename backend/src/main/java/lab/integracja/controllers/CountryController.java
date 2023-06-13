@@ -1,6 +1,7 @@
 package lab.integracja.controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lab.integracja.entities.Country;
 import lab.integracja.services.CountryService;
 import lab.integracja.utils.CsvUtils;
 import lab.integracja.utils.XMLFileGenerator;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -24,6 +26,11 @@ public class CountryController {
     private final CountryService countryService;
     private final CsvUtils csvUtils;
     private final XMLFileGenerator xmlFileGenerator;
+
+    @GetMapping("/")
+    public ResponseEntity<List<Country>> getAll() {
+        return ResponseEntity.ok(countryService.getAll());
+    }
 
     @GetMapping("/csv")
     public void exportIntoCsv(HttpServletResponse response) throws IOException {
