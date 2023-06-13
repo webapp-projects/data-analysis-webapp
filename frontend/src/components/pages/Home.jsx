@@ -3,9 +3,9 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { addTokenToRequestHeader } from '../../helpers/addTokenToRequestHeader';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { CustomTooltip } from '../organisms/CustomTooltip';
 
 export const Home = () => {
-  // const countries = ['ARG', 'AUT', 'BEL', 'BGR', 'BRA', 'CAN', 'CHE', 'CHL', 'COL', 'CRI', 'CZE', 'DEU', 'DNK', 'ESP', 'EST', 'FIN', 'FRA', 'GBR', 'GRC', 'HRV', 'HUN', 'IRL', 'ISL', 'ISR', 'ITA', 'JPN', 'KOR', 'LTU', 'LUX', 'LVA', 'MEX', 'NLD', 'NOR', 'NZL', 'PER', 'POL', 'PRT', 'ROU', 'RUS', 'SVK', 'SVN', 'SWE', 'TUR', 'USA', 'ZAF'];
   const [isLoading, setIsLoading] = useState(true);
   const [suicideData, setSuicideData] = useState(null);
   const [alcoholData, setAlcoholData] = useState(null);
@@ -14,11 +14,13 @@ export const Home = () => {
   const [filter, setFilter] = useState('TOT');
   const [xmlExportData, setXmlExportData] = useState('Raw Data');
   const [csvExportData, setCsvExportData] = useState('Raw Data');
+  const [jsonExportData, setJsonExportData] = useState('Raw Data');
   const [csvFile, setCsvFile] = useState(null);
+  const [xmlFile, setXmlFile] = useState(null);
   const [avgSuicides, setAvgSuicides] = useState();
   const [avgAlcoholUsage, setAvgAlcoholUsage] = useState();
 
-  // for relative y axis calculations
+  // relative y axis calculations
   const [maxAlcoholValue, setMaxAlcoholValue] = useState(null);
   const [maxSuicidesValue, setMaxSuicidesValue] = useState(null);
 
@@ -59,6 +61,26 @@ export const Home = () => {
         downloadLink.download = name;
         downloadLink.click();
       });
+  };
+
+  const handleXmlFileChange = (e) => {
+    setXmlFile(e.target.files[0]);
+  };
+
+  const handleXmlUpload = (e) => {
+    if (xmlFile) {
+      const formData = new FormData();
+      formData.append('file', xmlFile);
+
+      axios
+        .post('http://localhost:8080/api/countries/upload-xml', formData)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
 
   const handleCsvExportDataChange = (e) => {
@@ -106,6 +128,31 @@ export const Home = () => {
     }
   };
 
+  const handleJsonExportDataChange = (e) => {
+    setJsonExportData(e.target.value);
+  };
+
+  const handleJsonDownload = () => {
+    let endpoint = '';
+    let name = '';
+    if (jsonExportData === 'Raw Data') {
+      endpoint = 'http://localhost:8080/api/raw-data/json';
+      name = 'raw_data.json';
+    } else {
+      endpoint = 'http://localhost:8080/api/countries/json';
+      name = 'countries.json';
+    }
+
+    fetch(endpoint)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = name;
+        downloadLink.click();
+      });
+  };
+
   const handleSoapRequest = () => {
     const body = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:gs="http://localhost/integration">
@@ -124,7 +171,6 @@ export const Home = () => {
     axios
       .post('http://localhost:8080/ws', body, { headers })
       .then((response) => {
-        console.log(response.data);
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(response.data, 'text/xml');
 
@@ -216,6 +262,7 @@ export const Home = () => {
           <p className="flex w-full justify-center text-2xl text-sky-500 font-semibold">Alcohol usage and sucide rate</p>
           <p className=" w-full text-xl text-sky-950 font-semibold">Correlation analysis</p>
         </div>
+
         <ul className="menu menu-horizontal px-1">
           <div className="dropdown-end dropdown">
             <label tabIndex={0} className="btn-ghost btn-circle avatar btn">
@@ -231,6 +278,7 @@ export const Home = () => {
           </div>
         </ul>
       </div>
+
       <div className="flex items-center gap-5 mt-4">
         <select className="select w-24    max-w-xs border-2 border-gray-600/10 bg-gray-50 text-gray-700" onChange={handleCountryChange} defaultValue="POL">
           <option disabled>Choose country</option>
@@ -238,16 +286,19 @@ export const Home = () => {
             return <option key={country.code}>{country.code}</option>;
           })}
         </select>
+
         <select className="select  w-24   max-w-xs border-2 border-gray-600/10 bg-gray-50 text-gray-700 " onChange={handleFilterChange} defaultValue="TOT">
           <option disabled>Choose filter</option>
           <option>TOT</option>
           <option>WOMEN</option>
           <option>MEN</option>
         </select>
+
         <div className="flex items-center h-12 gap-5 border-2 bordery-gray-600/20 rounded-lg px-5 ">
           <p className="text-gray-800">
             Avg Alcohol usage:<span className="text-sky-500 ml-2 font-bold">{Math.round(avgAlcoholUsage * 100) / 100}</span>{' '}
           </p>
+
           <p className="text-gray-800">
             Avg Suicides:
             <span className="text-sky-500 ml-2 font-bold">{Math.round(avgSuicides * 100) / 100}</span>{' '}
@@ -281,7 +332,7 @@ export const Home = () => {
               {/* for nonrelative y axis: */}
               <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, 50]} />
 
-              <Tooltip />
+              <Tooltip content={<CustomTooltip />} />
 
               <Legend dy={20} wrapperStyle={{ position: 'relative', marginTop: '2px' }} />
 
@@ -292,33 +343,55 @@ export const Home = () => {
       </div>
       <div className="flex flex-col items-center gap-5">
         <h1 className="text-xl font-semibold text-gray-600 mt-7 mb-3">Export data</h1>
+
         <div className="flex items-center gap-5">
-          <p className="text-gray-700 text-md">XML:</p>
+          <p className="text-gray-600 text-md font-semibold">XML:</p>
           <select className="select  border-2 border-sky-600/30 bg-gray-50 text-gray-700 " defaultValue="Raw Data" onChange={handleXmlExportDataChange}>
             <option disabled>Choose filter</option>
             <option>Raw Data</option>
             <option>Countries</option>
           </select>
-          <button className="btn  bg-sky-500 text-sky-50 hover:bg-sky-600 border-0" onClick={handleXmlDownload}>
+          <button className="btn  bg-sky-500 text-sky-50 hover:bg-sky-600 border-0 normal-case" onClick={handleXmlDownload}>
             Export
           </button>
         </div>
+
         <div className="flex items-center gap-5">
-          <p className="text-gray-700 text-md">CSV:</p>
+          <p className="text-gray-600 text-md font-semibold">CSV:</p>
           <select className="select  border-2 border-sky-600/30 bg-gray-50 text-gray-700 " defaultValue="Raw Data" onChange={handleCsvExportDataChange}>
             <option disabled>Choose filter</option>
             <option>Raw Data</option>
             <option>Countries</option>
           </select>
-          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0" onClick={handleCsvDownload}>
+          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0 normal-case" onClick={handleCsvDownload}>
             Export
           </button>
         </div>
+
+        <div className="flex items-center gap-5">
+          <p className="text-gray-600 text-md font-semibold">JSON:</p>
+          <select className="select  border-2 border-sky-600/30 bg-gray-50 text-gray-700 " defaultValue="Raw Data" onChange={handleJsonExportDataChange}>
+            <option disabled>Choose filter</option>
+            <option>Raw Data</option>
+            <option>Countries</option>
+          </select>
+          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0 normal-case" onClick={handleJsonDownload}>
+            Export
+          </button>
+        </div>
+
         <h1 className="text-xl font-semibold text-gray-600 mt-3">Import data</h1>
         <div className="flex items-center gap-5">
-          <p className="text-gray-700 text-md">CSV:</p>
+          <p className="text-gray-600 text-md font-semibold">XML:</p>
+          <input type="file" onChange={handleXmlFileChange} className="file-input  file-input-ghost border-2 border-sky-600/30 bg-gray-50 text-gray-700 cursor-pointer  w-full max-w-xs" />
+          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0 disabled:bg-gray-100 disabled:text-gray-300 normal-case" disabled={!xmlFile ? 'disabled' : ''} onClick={handleXmlUpload}>
+            Upload
+          </button>
+        </div>
+        <div className="flex items-center gap-5">
+          <p className="text-gray-600 text-md font-semibold">CSV:</p>
           <input type="file" onChange={handleCsvFileChange} className="file-input  file-input-ghost border-2 border-sky-600/30 bg-gray-50 text-gray-700 cursor-pointer  w-full max-w-xs" />
-          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0" onClick={handleCsvUpload}>
+          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0 disabled:bg-gray-100 disabled:text-gray-300 normal-case" disabled={!csvFile ? 'disabled' : ''} onClick={handleCsvUpload}>
             Upload
           </button>
         </div>
