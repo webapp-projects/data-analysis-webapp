@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lab.integracja.entities.Country;
 import lab.integracja.services.CountryService;
 import lab.integracja.utils.CsvUtils;
+import lab.integracja.utils.JSONUtils;
 import lab.integracja.utils.XMLUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ public class CountryController {
     private final CountryService countryService;
     private final CsvUtils csvUtils;
     private final XMLUtils xmlUtils;
+    private final JSONUtils jsonUtils;
 
     @GetMapping("/")
     public ResponseEntity<List<Country>> getAll() {
@@ -44,6 +46,13 @@ public class CountryController {
         response.setContentType("text/xml");
         response.addHeader("Content-Disposition", "attachment; filename=\"countries.xml\"");
         xmlUtils.writeCountriesToXML(countryService.getAll(), response.getWriter());
+    }
+
+    @GetMapping("/json")
+    public void exportToJson(HttpServletResponse response) throws IOException {
+        response.setContentType("text/json");
+        response.addHeader("Content-Disposition", "attachment; filename=\"countries.json\"");
+        jsonUtils.writeCountriesToJson(countryService.getAll(), response.getWriter());
     }
 
     @PostMapping("/upload-csv")
