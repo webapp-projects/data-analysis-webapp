@@ -31,12 +31,14 @@ public class XMLUtils {
     public void writeCountriesToXML(List<Country> countries, Writer writer) {
         XMLWriter printer = new XMLWriter(writer);
         printer.writeXMLHeader();
+        printer.writeElement("", "countries", XMLWriter.OPENING);
         for (Country country : countries) {
             printer.writeElement("", "country", XMLWriter.OPENING);
             printer.writeProperty("", "id", country.getId().toString());
             printer.writeProperty("", "code", country.getCode());
             printer.writeElement("", "country", XMLWriter.CLOSING);
         }
+        printer.writeElement("", "countries", XMLWriter.CLOSING);
         try {
             printer.sendData();
         } catch (IOException e) {
