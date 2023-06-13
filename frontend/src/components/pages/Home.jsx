@@ -219,7 +219,7 @@ export const Home = () => {
         <ul className="menu menu-horizontal px-1">
           <div className="dropdown-end dropdown">
             <label tabIndex={0} className="btn-ghost btn-circle avatar btn">
-              <div className="flex w-12 items-center justify-center rounded-full border-2 border-sky-600  bg-sky-500/40"></div>
+              <div className="flex w-12 items-center justify-center rounded-full border-2 border-sky-500  bg-gray-200/40"></div>
             </label>
             <ul tabIndex={0} className="menu-compact dropdown-content menu rounded-box mt-3 w-52  border-2 border-gray-200/30 bg-gray-100 p-2   shadow-2xl">
               <li>
@@ -256,7 +256,7 @@ export const Home = () => {
       </div>
 
       <div className="flex w-full h-full gap-5 mt-5">
-        <div className="bg-gray-100 rounded-2xl   border-gray-500/10 border h-auto w-full   flex justify-center items-center py-12">
+        <div className="bg-gray-100/60 rounded-2xl   border-gray-500/10 border h-auto w-full   flex justify-center items-center py-12">
           <ResponsiveContainer width="100%" aspect={6.5 / 3.0} maxHeight={450}>
             <AreaChart data={data} margin={{ right: 20, left: 0 }}>
               <defs>
