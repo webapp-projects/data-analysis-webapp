@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lab.integracja.entities.Country;
 import lab.integracja.services.CountryService;
 import lab.integracja.utils.CsvUtils;
-import lab.integracja.utils.XMLFileGenerator;
+import lab.integracja.utils.XMLUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,7 @@ public class CountryController {
 
     private final CountryService countryService;
     private final CsvUtils csvUtils;
-    private final XMLFileGenerator xmlFileGenerator;
+    private final XMLUtils xmlUtils;
 
     @GetMapping("/")
     public ResponseEntity<List<Country>> getAll() {
@@ -43,11 +43,11 @@ public class CountryController {
     public void exportToXML(HttpServletResponse response) throws IOException {
         response.setContentType("text/xml");
         response.addHeader("Content-Disposition", "attachment; filename=\"countries.xml\"");
-        xmlFileGenerator.writeCountriesToXML(countryService.getAll(), response.getWriter());
+        xmlUtils.writeCountriesToXML(countryService.getAll(), response.getWriter());
     }
 
     @PostMapping("/upload-csv")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadCsvFile(@RequestParam("file") MultipartFile file) {
         String message = "";
 
         if (csvUtils.hasCSVFormat(file)) {
@@ -63,4 +63,25 @@ public class CountryController {
         message = "Please upload a csv file!";
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
+
+    @PostMapping("/upload-xml")
+    public ResponseEntity<String> uploadXMLFile(@RequestParam("file") MultipartFile file) {
+        String message = "";
+
+        if (xmlUtils.hasXMLFormat(file)) {
+            try {
+                countryService.saveXMLToDatabase(file);
+                message = "Uploaded the file successfully: " + file.getOriginalFilename();
+                return ResponseEntity.status(HttpStatus.OK).body(message);
+            } catch (Exception e) {
+                message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+            }
+        }
+        message = "Please upload a XML file!";
+        System.out.println(file.getContentType());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+
+    // TODO: export JSON, import XML, JSON
 }
