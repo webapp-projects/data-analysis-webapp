@@ -3,19 +3,24 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { addTokenToRequestHeader } from '../../helpers/addTokenToRequestHeader';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { format, parseISO } from 'date-fns';
 
 export const Home = () => {
-  const countries = ['ARG', 'AUT', 'BEL', 'BGR', 'BRA', 'CAN', 'CHE', 'CHL', 'COL', 'CRI', 'CZE', 'DEU', 'DNK', 'ESP', 'EST', 'FIN', 'FRA', 'GBR', 'GRC', 'HRV', 'HUN', 'IRL', 'ISL', 'ISR', 'ITA', 'JPN', 'KOR', 'LTU', 'LUX', 'LVA', 'MEX', 'NLD', 'NOR', 'NZL', 'PER', 'POL', 'PRT', 'ROU', 'RUS', 'SVK', 'SVN', 'SWE', 'TUR', 'USA', 'ZAF'];
+  // const countries = ['ARG', 'AUT', 'BEL', 'BGR', 'BRA', 'CAN', 'CHE', 'CHL', 'COL', 'CRI', 'CZE', 'DEU', 'DNK', 'ESP', 'EST', 'FIN', 'FRA', 'GBR', 'GRC', 'HRV', 'HUN', 'IRL', 'ISL', 'ISR', 'ITA', 'JPN', 'KOR', 'LTU', 'LUX', 'LVA', 'MEX', 'NLD', 'NOR', 'NZL', 'PER', 'POL', 'PRT', 'ROU', 'RUS', 'SVK', 'SVN', 'SWE', 'TUR', 'USA', 'ZAF'];
   const [isLoading, setIsLoading] = useState(true);
-  const [suicideData, setSuicideData] = useState();
-  const [alcoholData, setAlcoholData] = useState();
+  const [suicideData, setSuicideData] = useState(null);
+  const [alcoholData, setAlcoholData] = useState(null);
+  const [countriesData, setCountriesData] = useState();
   const [country, setCountry] = useState('POL');
   const [filter, setFilter] = useState('TOT');
-  const [maxAlcoholValue, setMaxAlcoholValue] = useState();
-  const [maxSuicidesValue, setMaxSuicidesValue] = useState();
   const [xmlExportData, setXmlExportData] = useState('Raw Data');
   const [csvExportData, setCsvExportData] = useState('Raw Data');
+  const [csvFile, setCsvFile] = useState(null);
+  const [avgSuicides, setAvgSuicides] = useState();
+  const [avgAlcoholUsage, setAvgAlcoholUsage] = useState();
+
+  // for relative y axis calculations
+  const [maxAlcoholValue, setMaxAlcoholValue] = useState(null);
+  const [maxSuicidesValue, setMaxSuicidesValue] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -23,6 +28,7 @@ export const Home = () => {
   };
 
   const handleCountryChange = (e) => {
+    handleSoapRequest();
     setCountry(e.target.value);
   };
 
@@ -80,8 +86,58 @@ export const Home = () => {
       });
   };
 
+  const handleCsvFileChange = (e) => {
+    setCsvFile(e.target.files[0]);
+  };
+
+  const handleCsvUpload = () => {
+    if (csvFile) {
+      const formData = new FormData();
+      formData.append('file', csvFile);
+
+      axios
+        .post('http://localhost:8080/api/countries/upload-csv', formData)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  const handleSoapRequest = () => {
+    const body = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:gs="http://localhost/integration">
+    <soapenv:Header/>
+    <soapenv:Body>
+    <gs:getCountryRequest>
+    <gs:name>${country}</gs:name>
+    </gs:getCountryRequest>
+    </soapenv:Body>
+    </soapenv:Envelope>`;
+
+    const headers = {
+      'Content-Type': 'text/xml',
+    };
+
+    axios
+      .post('http://localhost:8080/ws', body, { headers })
+      .then((response) => {
+        console.log(response.data);
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(response.data, 'text/xml');
+
+        setAvgSuicides(xmlDoc.getElementsByTagName('ns2:avgSuicideRate')[0].textContent);
+        setAvgAlcoholUsage(xmlDoc.getElementsByTagName('ns2:avgAlcoholConsumption')[0].textContent);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   useEffect(() => {
-    let endpoints = [`http://localhost:8080/api/suicide/country/${country}?subject=${filter}`, `http://localhost:8080/api/alcohol/country/${country}?subject=TOT`];
+    let endpoints = [`http://localhost:8080/api/suicide/country/${country}?subject=${filter}`, `http://localhost:8080/api/alcohol/country/${country}?subject=TOT`, 'http://localhost:8080/api/countries/'];
 
     const headers = addTokenToRequestHeader();
 
@@ -95,6 +151,7 @@ export const Home = () => {
         const responseData = await Promise.all(dataPromises);
         setSuicideData(responseData[0]);
         setAlcoholData(responseData[1]);
+        setCountriesData(responseData[2]);
 
         if (responseData[0]) {
           const maxSuicidesValue = Math.max(...responseData[1].map((obj) => obj.value));
@@ -115,8 +172,11 @@ export const Home = () => {
     fetchData();
   }, [country, filter]);
 
+  handleSoapRequest();
+
   let transformedSuicidesArray = [];
   let transformedAlcoholArray = [];
+  let transformedCountriesArray = [];
 
   if (!isLoading && suicideData) {
     transformedSuicidesArray = suicideData.map((obj) => {
@@ -172,22 +232,31 @@ export const Home = () => {
         </ul>
       </div>
       <div className="flex items-center gap-5 mt-4">
-        <select className="select w-24  max-w-xs border-2 border-gray-600/10 bg-gray-50 text-gray-700" onChange={handleCountryChange} defaultValue="POL">
+        <select className="select w-24    max-w-xs border-2 border-gray-600/10 bg-gray-50 text-gray-700" onChange={handleCountryChange} defaultValue="POL">
           <option disabled>Choose country</option>
-          {countries.map((country) => {
-            return <option key={country}>{country}</option>;
+          {countriesData.map((country) => {
+            return <option key={country.code}>{country.code}</option>;
           })}
         </select>
-        <select className="select  w-24 max-w-xs border-2 border-gray-600/10 bg-gray-50 text-gray-700 " onChange={handleFilterChange} defaultValue="TOT">
+        <select className="select  w-24   max-w-xs border-2 border-gray-600/10 bg-gray-50 text-gray-700 " onChange={handleFilterChange} defaultValue="TOT">
           <option disabled>Choose filter</option>
           <option>TOT</option>
           <option>WOMEN</option>
           <option>MEN</option>
         </select>
+        <div className="flex items-center h-12 gap-5 border-2 bordery-gray-600/20 rounded-lg px-5 ">
+          <p className="text-gray-800">
+            Avg Alcohol usage:<span className="text-sky-500 ml-2 font-bold">{Math.round(avgAlcoholUsage * 100) / 100}</span>{' '}
+          </p>
+          <p className="text-gray-800">
+            Avg Suicides:
+            <span className="text-sky-500 ml-2 font-bold">{Math.round(avgSuicides * 100) / 100}</span>{' '}
+          </p>
+        </div>
       </div>
 
       <div className="flex w-full h-full gap-5 mt-5">
-        <div className="bg-gray-100 rounded-xl h-auto w-full   flex justify-center items-center py-12">
+        <div className="bg-gray-100 rounded-2xl   border-gray-500/10 border h-auto w-full   flex justify-center items-center py-12">
           <ResponsiveContainer width="100%" aspect={6.5 / 3.0} maxHeight={450}>
             <AreaChart data={data} margin={{ right: 20, left: 0 }}>
               <defs>
@@ -228,7 +297,7 @@ export const Home = () => {
           <select className="select  border-2 border-sky-600/30 bg-gray-50 text-gray-700 " defaultValue="Raw Data" onChange={handleXmlExportDataChange}>
             <option disabled>Choose filter</option>
             <option>Raw Data</option>
-            <option>Contries</option>
+            <option>Countries</option>
           </select>
           <button className="btn  bg-sky-500 text-sky-50 hover:bg-sky-600 border-0" onClick={handleXmlDownload}>
             Export
@@ -239,7 +308,7 @@ export const Home = () => {
           <select className="select  border-2 border-sky-600/30 bg-gray-50 text-gray-700 " defaultValue="Raw Data" onChange={handleCsvExportDataChange}>
             <option disabled>Choose filter</option>
             <option>Raw Data</option>
-            <option>Contries</option>
+            <option>Countries</option>
           </select>
           <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0" onClick={handleCsvDownload}>
             Export
@@ -248,7 +317,10 @@ export const Home = () => {
         <h1 className="text-xl font-semibold text-gray-600 mt-3">Import data</h1>
         <div className="flex items-center gap-5">
           <p className="text-gray-700 text-md">CSV:</p>
-          <input type="file" className="file-input  file-input-ghost border-2 border-sky-600/30 bg-gray-50 text-gray-700 cursor-pointer  w-full max-w-xs" />
+          <input type="file" onChange={handleCsvFileChange} className="file-input  file-input-ghost border-2 border-sky-600/30 bg-gray-50 text-gray-700 cursor-pointer  w-full max-w-xs" />
+          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0" onClick={handleCsvUpload}>
+            Upload
+          </button>
         </div>
       </div>
     </div>
