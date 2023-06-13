@@ -21,6 +21,11 @@ public class XMLFileGenerator {
             printer.writeProperty("", "code", country.getCode());
             printer.writeElement("", "country", XMLWriter.CLOSING);
         }
+        try {
+            printer.sendData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void writeRawDataToXML(List<RawData> rawDataList, Writer writer) {
