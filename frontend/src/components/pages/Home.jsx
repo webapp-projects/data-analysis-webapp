@@ -90,6 +90,7 @@ export const Home = () => {
           console.log(error);
         });
     }
+    setXmlFile(null);
   };
 
   // - CSV -
@@ -140,6 +141,7 @@ export const Home = () => {
           console.log(error);
         });
     }
+    setCsvFile(null);
   };
 
   // - JSON -
@@ -168,6 +170,7 @@ export const Home = () => {
         downloadLink.download = name;
         downloadLink.click();
       });
+    setJsonFile(null);
   };
 
   // update uploaded json file
@@ -258,7 +261,7 @@ export const Home = () => {
     };
 
     fetchData();
-  }, [country, filter]);
+  }, [country, filter, csvFile, xmlFile, jsonFile]);
 
   handleSoapRequest();
 
