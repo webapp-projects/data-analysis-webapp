@@ -17,13 +17,15 @@ export const Home = () => {
   const [jsonExportData, setJsonExportData] = useState('Raw Data');
   const [csvFile, setCsvFile] = useState(null);
   const [xmlFile, setXmlFile] = useState(null);
-  const [avgSuicides, setAvgSuicides] = useState();
-  const [avgAlcoholUsage, setAvgAlcoholUsage] = useState();
+  const [jsonFile, setJsonFile] = useState(null);
+  const [avgSuicides, setAvgSuicides] = useState(null);
+  const [avgAlcoholUsage, setAvgAlcoholUsage] = useState(null);
 
-  // relative y axis calculations
+  // for relative y axis calculations
   const [maxAlcoholValue, setMaxAlcoholValue] = useState(null);
   const [maxSuicidesValue, setMaxSuicidesValue] = useState(null);
 
+  // remove token and reload page (results in redirect to /login)
   const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.reload();
@@ -38,10 +40,13 @@ export const Home = () => {
     setFilter(e.target.value);
   };
 
+  // -- XML --
+  // update xml download type
   const handleXmlExportDataChange = (e) => {
     setXmlExportData(e.target.value);
   };
 
+  // download xml file
   const handleXmlDownload = () => {
     let endpoint = '';
     let name = '';
@@ -63,10 +68,12 @@ export const Home = () => {
       });
   };
 
+  // update uploaded xml file
   const handleXmlFileChange = (e) => {
     setXmlFile(e.target.files[0]);
   };
 
+  //sent xml upload
   const handleXmlUpload = (e) => {
     if (xmlFile) {
       const formData = new FormData();
@@ -85,10 +92,13 @@ export const Home = () => {
     }
   };
 
+  // - CSV -
+  // update xml download type
   const handleCsvExportDataChange = (e) => {
     setCsvExportData(e.target.value);
   };
 
+  // csv download
   const handleCsvDownload = () => {
     let endpoint = '';
     let name = '';
@@ -110,10 +120,12 @@ export const Home = () => {
       });
   };
 
+  // update uploaded xml file
   const handleCsvFileChange = (e) => {
     setCsvFile(e.target.files[0]);
   };
 
+  //sent csv upload
   const handleCsvUpload = () => {
     if (csvFile) {
       const formData = new FormData();
@@ -130,10 +142,13 @@ export const Home = () => {
     }
   };
 
+  // - JSON -
+  // update download json type
   const handleJsonExportDataChange = (e) => {
     setJsonExportData(e.target.value);
   };
 
+  // json download
   const handleJsonDownload = () => {
     let endpoint = '';
     let name = '';
@@ -155,6 +170,29 @@ export const Home = () => {
       });
   };
 
+  // update uploaded json file
+  const handleJsonFileChange = (e) => {
+    setJsonFile(e.target.files[0]);
+  };
+
+  //sent json upload
+  const handleJsonUpload = () => {
+    if (jsonFile) {
+      const formData = new FormData();
+      formData.append('file', jsonFile);
+
+      axios
+        .post('http://localhost:8080/api/countries/upload-json', formData)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  };
+
+  // SOAP request for Avg Suicide and Alcohol Usage data
   const handleSoapRequest = () => {
     const body = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
     xmlns:gs="http://localhost/integration">
@@ -201,11 +239,13 @@ export const Home = () => {
         setAlcoholData(responseData[1]);
         setCountriesData(responseData[2]);
 
+        // find max value of Suicides (for relative Y-axis)
         if (responseData[0]) {
           const maxSuicidesValue = Math.max(...responseData[1].map((obj) => obj.value));
           setMaxSuicidesValue(maxSuicidesValue);
         }
 
+        // find max value of Alcohol Usage (for relative Y-axis)
         if (responseData[1]) {
           const maxAlcoholValue = Math.max(...responseData[1].map((obj) => obj.value));
           setMaxAlcoholValue(maxAlcoholValue);
@@ -224,8 +264,8 @@ export const Home = () => {
 
   let transformedSuicidesArray = [];
   let transformedAlcoholArray = [];
-  let transformedCountriesArray = [];
 
+  // transform Suicides data for chart display
   if (!isLoading && suicideData) {
     transformedSuicidesArray = suicideData.map((obj) => {
       return {
@@ -235,6 +275,7 @@ export const Home = () => {
     });
   }
 
+  // transform Alcohol Usage data for chart display
   if (!isLoading && alcoholData) {
     transformedAlcoholArray = alcoholData.map((obj) => {
       return {
@@ -244,6 +285,7 @@ export const Home = () => {
     });
   }
 
+  // combine Alcohol Usage and Suicides data into one array
   const data = transformedSuicidesArray.map((suicideObj, index) => {
     const alcoholObj = transformedAlcoholArray[index];
     return {
@@ -253,6 +295,7 @@ export const Home = () => {
     };
   });
 
+  // display loading info (enables Recharts animation)
   if (isLoading) {
     return <div className="text-6xl font-bold text-gray-800/40">Loading data...</div>;
   }
@@ -394,6 +437,13 @@ export const Home = () => {
           <p className="text-gray-600 text-md font-semibold">CSV:</p>
           <input type="file" onChange={handleCsvFileChange} className="file-input  file-input-ghost border-2 border-sky-600/30 bg-gray-50 text-gray-700 cursor-pointer  w-full max-w-xs" />
           <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0 disabled:bg-gray-100 disabled:text-gray-300 normal-case" disabled={!csvFile ? 'disabled' : ''} onClick={handleCsvUpload}>
+            Upload
+          </button>
+        </div>
+        <div className="flex items-center gap-5">
+          <p className="text-gray-600 text-md font-semibold">JSON:</p>
+          <input type="file" onChange={handleJsonFileChange} className="file-input  file-input-ghost border-2 border-sky-600/30 bg-gray-50 text-gray-700 cursor-pointer  w-full max-w-xs" />
+          <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0 disabled:bg-gray-100 disabled:text-gray-300 normal-case" disabled={!jsonFile ? 'disabled' : ''} onClick={handleJsonUpload}>
             Upload
           </button>
         </div>
