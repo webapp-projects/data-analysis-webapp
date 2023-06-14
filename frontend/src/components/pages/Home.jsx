@@ -72,6 +72,8 @@ export const Home = () => {
       const formData = new FormData();
       formData.append('file', xmlFile);
 
+      console.log(formData);
+
       axios
         .post('http://localhost:8080/api/countries/upload-xml', formData)
         .then((response) => {
@@ -266,7 +268,7 @@ export const Home = () => {
         <ul className="menu menu-horizontal px-1">
           <div className="dropdown-end dropdown">
             <label tabIndex={0} className="btn-ghost btn-circle avatar btn">
-              <div className="flex w-12 items-center justify-center rounded-full border-2 border-sky-500  bg-gray-200/40"></div>
+              <div className="flex w-12 items-center justify-center rounded-full border  border-gray-500/10  bg-gray-100  "></div>
             </label>
             <ul tabIndex={0} className="menu-compact dropdown-content menu rounded-box mt-3 w-52  border-2 border-gray-200/30 bg-gray-100 p-2   shadow-2xl">
               <li>
@@ -330,11 +332,11 @@ export const Home = () => {
               {/* <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, Math.max(maxSuicidesValue, maxAlcoholValue)]} /> */}
 
               {/* for nonrelative y axis: */}
-              <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, 50]} />
+              <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, 55]} />
 
               <Tooltip content={<CustomTooltip />} />
 
-              <Legend dy={20} wrapperStyle={{ position: 'relative', marginTop: '2px' }} />
+              <Legend dy={20} wrapperStyle={{ position: 'relative', marginTop: '2px' }} q />
 
               <CartesianGrid opacity={0.4} strokeWidth={2} vertical={false} />
             </AreaChart>
