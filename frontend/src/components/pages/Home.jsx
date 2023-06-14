@@ -223,7 +223,7 @@ export const Home = () => {
   };
 
   useEffect(() => {
-    let endpoints = [`http://localhost:8080/api/suicide/country/${country}?subject=${filter}`, `http://localhost:8080/api/alcohol/country/${country}?subject=TOT`, 'http://localhost:8080/api/countries/'];
+    let endpoints = [`http://localhost:8080/api/suicide/country/${country}?subject=${filter}`, `http://localhost:8080/api/alcohol/country/${country}?subject=TOT`, 'http://localhost:8080/api/countries'];
 
     const headers = addTokenToRequestHeader();
 
