@@ -2,6 +2,7 @@ package lab.integracja.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lab.integracja.entities.Country;
+import lab.integracja.entities.RawData;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,9 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -51,5 +50,21 @@ public class JSONUtils {
         }
 
         return countries;
+    }
+
+    public void writeRawDataToJson(List<RawData> rawDataList, Writer writer) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            writer.append("{");
+            for (int i = 0; i < rawDataList.size() - 1; i++ ) {
+                writer.append(objectMapper.writeValueAsString(rawDataList.get(i)));
+                writer.append(",\n");
+            }
+            writer.append(objectMapper.writeValueAsString(rawDataList.get(rawDataList.size()-1)));
+            writer.append("}");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
