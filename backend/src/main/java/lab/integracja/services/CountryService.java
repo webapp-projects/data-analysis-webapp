@@ -3,6 +3,7 @@ package lab.integracja.services;
 import lab.integracja.entities.Country;
 import lab.integracja.repositories.CountryRepository;
 import lab.integracja.utils.CsvUtils;
+import lab.integracja.utils.JSONUtils;
 import lab.integracja.utils.XMLUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class CountryService {
     private final CountryRepository countryRepository;
     private final CsvUtils csvUtils;
     private final XMLUtils xmlUtils;
+    private final JSONUtils jsonUtils;
 
     public boolean isValidCountryCode(String countryCode) {
         return countryRepository.findByCode(countryCode).isPresent();
@@ -42,6 +44,15 @@ public class CountryService {
     public void saveXMLToDatabase(MultipartFile file) {
         try {
             List<Country> countries = xmlUtils.xmlToCountries(file.getInputStream());
+            countryRepository.saveAll(countries);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void saveJsonToDatabase(MultipartFile file) {
+        try {
+            List<Country> countries = jsonUtils.jsonToCountries(file.getInputStream());
             countryRepository.saveAll(countries);
         } catch (IOException e) {
             e.printStackTrace();
