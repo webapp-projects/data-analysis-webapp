@@ -29,7 +29,7 @@ public class CountryController {
     private final XMLUtils xmlUtils;
     private final JSONUtils jsonUtils;
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<List<Country>> getAll() {
         return ResponseEntity.ok(countryService.getAll());
     }
@@ -92,5 +92,23 @@ public class CountryController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
     }
 
-    // TODO: export JSON, import XML, JSON
+    @PostMapping("/upload-json")
+    public ResponseEntity<String> uploadJSONFile(@RequestParam("file") MultipartFile file) {
+        String message = "";
+
+        if (jsonUtils.hasJsonFormat(file)) {
+            try {
+                countryService.saveJsonToDatabase(file);
+                message = "Uploaded the file successfully: " + file.getOriginalFilename();
+                return ResponseEntity.status(HttpStatus.OK).body(message);
+            } catch (Exception e) {
+                message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
+            }
+        }
+        message = "Please upload a JSON file!";
+        System.out.println(file.getContentType());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(message);
+    }
+
 }

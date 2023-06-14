@@ -2,14 +2,18 @@ package lab.integracja.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lab.integracja.entities.Country;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 @Component
 public class JSONUtils {
@@ -33,5 +37,19 @@ public class JSONUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<Country> jsonToCountries(InputStream is) {
+        Scanner s = new Scanner(is).useDelimiter("\\A");
+        String result = s.hasNext() ? s.next() : "";
+        JSONObject object = new JSONObject(result);
+        List<Country> countries = new ArrayList<>();
+        for (int i = 0; i < object.getJSONArray("countries").length(); i++) {
+            countries.add(new Country(
+                    null, object.getJSONArray("countries").getJSONObject(i).getString("code"))
+            );
+        }
+
+        return countries;
     }
 }
