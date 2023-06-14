@@ -375,7 +375,7 @@ export const Home = () => {
               {/* <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, Math.max(maxSuicidesValue, maxAlcoholValue)]} /> */}
 
               {/* for nonrelative y axis: */}
-              <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, 55]} />
+              <YAxis dx={2} dataKey="suicideValue" axisLine={false} tickLine={false} tickCount={5} domain={[0, 45]} />
 
               <Tooltip content={<CustomTooltip />} />
 
