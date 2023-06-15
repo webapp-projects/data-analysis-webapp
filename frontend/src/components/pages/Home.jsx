@@ -20,6 +20,7 @@ export const Home = () => {
   const [jsonFile, setJsonFile] = useState(null);
   const [avgSuicides, setAvgSuicides] = useState(null);
   const [avgAlcoholUsage, setAvgAlcoholUsage] = useState(null);
+  const [alertVisibility, setAlertVisibility] = useState('hidden');
 
   // for relative y axis calculations
   const [maxAlcoholValue, setMaxAlcoholValue] = useState(null);
@@ -38,6 +39,10 @@ export const Home = () => {
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
+  };
+
+  const handleHideAlert = () => {
+    setAlertVisibility('hidden');
   };
 
   // -- XML --
@@ -85,6 +90,7 @@ export const Home = () => {
         .post('http://localhost:8080/api/countries/upload-xml', formData)
         .then((response) => {
           console.log(response.data);
+          setAlertVisibility('block');
         })
         .catch((error) => {
           console.log(error);
@@ -136,6 +142,7 @@ export const Home = () => {
         .post('http://localhost:8080/api/countries/upload-csv', formData)
         .then((response) => {
           console.log(response.data);
+          setAlertVisibility('block');
         })
         .catch((error) => {
           console.log(error);
@@ -170,7 +177,6 @@ export const Home = () => {
         downloadLink.download = name;
         downloadLink.click();
       });
-    setJsonFile(null);
   };
 
   // update uploaded json file
@@ -188,11 +194,13 @@ export const Home = () => {
         .post('http://localhost:8080/api/countries/upload-json', formData)
         .then((response) => {
           console.log(response.data);
+          setAlertVisibility('block');
         })
         .catch((error) => {
           console.log(error);
         });
     }
+    setJsonFile(null);
   };
 
   // SOAP request for Avg Suicide and Alcohol Usage data
@@ -449,6 +457,17 @@ export const Home = () => {
           <button className="btn bg-sky-500 text-sky-50 hover:bg-sky-600 border-0 disabled:bg-gray-100 disabled:text-gray-300 normal-case" disabled={!jsonFile ? 'disabled' : ''} onClick={handleJsonUpload}>
             Upload
           </button>
+        </div>
+        <div className={`alert alert-success  max-w-2xl rounded-lg bg-sky-500  mb-4 flex justify-between ${alertVisibility} fixed top-8 shadow-2xl border-2 border-sky-400`}>
+          <div className="flex gap-5">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0  stroke-sky-50" fill="none" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-md font-semibold text-sky-50">File succsefully uploaded</span>
+          </div>
+          <div className="text-sky-50 bg-sky-400 px-3 py-1  flex justify-center cursor-pointer hover:bg-sky-300 items-center rounded-full" onClick={handleHideAlert}>
+            <p className="font-semibold text-sm">Close</p>
+          </div>
         </div>
       </div>
     </div>
