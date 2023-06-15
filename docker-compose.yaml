@@ -1,19 +1,18 @@
 version: '3.7'
 
-# Define services
 services:
   # App backend service
   app-server:
     # Configuration for building the docker image for the backend service
     build:
-      context: backend # Use an image built from the specified dockerfile in the `polling-app-server` directory.
+      context: backend 
       dockerfile: Dockerfile
     ports:
-      - "8080:8080" # Forward the exposed port 8080 on the container to port 8080 on the host machine
+      - "8080:8080" 
     restart: always
     depends_on:
-      - db # This service depends on mysql. Start that first.
-    environment: # Pass environment variables to the service
+      - db 
+    environment: 
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/integracja
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
@@ -22,24 +21,22 @@ services:
       SPRING_JPA_HIBERNATE_DDL-AUTO: update
       SPRING_DATASOURCE_INITIALIZATION-MODE: always
       SPRING_DATASOURCE_DATA: file:/app/src/main/resources/data.sql
-    networks: # Networks to join (Services on the same network can communicate with each other using their name)
+    networks: 
       - backend
       - frontend
 
   # Frontend Service 
-#  app-client:
-#    build:
-#      context: polling-app-client # Use an image built from the specified dockerfile in the `polling-app-client` directory.
-#      dockerfile: Dockerfile
-#      args:
-#        REACT_APP_API_BASE_URL: http://127.0.0.1:8080/api
-#    ports:
-#      - "9090:80" # Map the exposed port 80 on the container to port 9090 on the host machine
-#    restart: always
-#    depends_on:
-#      - app-server
-#    networks:
-#      - frontend  
+  app-client:
+    build:
+      context: frontend 
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173" 
+    restart: always
+    depends_on:
+      - app-server
+    networks:
+      - frontend  
 
   # Database Service (Mysql)
   db:
