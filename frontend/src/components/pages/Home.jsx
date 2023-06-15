@@ -275,8 +275,6 @@ export const Home = () => {
     fetchData();
   }, [country, filter, csvFile, xmlFile, jsonFile]);
 
-  handleSoapRequest();
-
   let transformedSuicidesArray = [];
   let transformedAlcoholArray = [];
 
