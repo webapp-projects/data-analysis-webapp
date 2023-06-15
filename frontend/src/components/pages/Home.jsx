@@ -21,6 +21,7 @@ export const Home = () => {
   const [avgSuicides, setAvgSuicides] = useState(null);
   const [avgAlcoholUsage, setAvgAlcoholUsage] = useState(null);
   const [alertVisibility, setAlertVisibility] = useState('hidden');
+  const [alertMessage, setAlertMessage] = useState('');
 
   // for relative y axis calculations
   const [maxAlcoholValue, setMaxAlcoholValue] = useState(null);
@@ -90,6 +91,7 @@ export const Home = () => {
         .post('http://localhost:8080/api/countries/upload-xml', formData)
         .then((response) => {
           console.log(response.data);
+          setAlertMessage('XML');
           setAlertVisibility('block');
         })
         .catch((error) => {
@@ -142,6 +144,7 @@ export const Home = () => {
         .post('http://localhost:8080/api/countries/upload-csv', formData)
         .then((response) => {
           console.log(response.data);
+          setAlertMessage('CSV');
           setAlertVisibility('block');
         })
         .catch((error) => {
@@ -194,6 +197,7 @@ export const Home = () => {
         .post('http://localhost:8080/api/countries/upload-json', formData)
         .then((response) => {
           console.log(response.data);
+          setAlertMessage('JSON');
           setAlertVisibility('block');
         })
         .catch((error) => {
@@ -463,7 +467,7 @@ export const Home = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0  stroke-sky-50" fill="none" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-md font-semibold text-sky-50">File succsefully uploaded</span>
+            <span className="text-md font-semibold text-sky-50">{alertMessage} file uploaded successfully </span>
           </div>
           <div className="text-sky-50 bg-sky-400 px-3 py-1  flex justify-center cursor-pointer hover:bg-sky-300 items-center rounded-full" onClick={handleHideAlert}>
             <p className="font-semibold text-sm">Close</p>
