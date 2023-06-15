@@ -246,6 +246,7 @@ export const Home = () => {
       try {
         const dataPromises = endpoints.map(async (endpoint) => {
           const response = await axios.get(endpoint, { headers });
+
           return response.data;
         });
 
@@ -268,6 +269,7 @@ export const Home = () => {
 
         setIsLoading(false);
       } catch (error) {
+        handleLogout();
         console.log(error);
       }
     };
