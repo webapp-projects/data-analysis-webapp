@@ -25,6 +25,9 @@ public class AuthenticationService {
     private final UserRepository userRepository;
 
     public AuthenticationResponse register(RegisterRequest request) {
+        if (userRepository.existsByLogin(request.getLogin())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists");
+        }
         User user = User.builder()
                 .login(request.getLogin())
                 .email(request.getEmail())
