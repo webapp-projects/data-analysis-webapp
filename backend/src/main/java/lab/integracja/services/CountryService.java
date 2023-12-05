@@ -1,7 +1,12 @@
 package lab.integracja.services;
 
+import lab.integracja.controllers.CountryData;
 import lab.integracja.entities.Country;
+import lab.integracja.entities.Measure;
+import lab.integracja.repositories.AlcoholConsumptionRepository;
 import lab.integracja.repositories.CountryRepository;
+import lab.integracja.repositories.MeasureRepository;
+import lab.integracja.repositories.SuicideRateRepository;
 import lab.integracja.utils.CsvUtils;
 import lab.integracja.utils.JSONUtils;
 import lab.integracja.utils.XMLUtils;
@@ -13,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +26,9 @@ import java.util.List;
 public class CountryService {
 
     private final CountryRepository countryRepository;
+    private final SuicideRateRepository suicideRateRepository;
+    private final AlcoholConsumptionRepository alcoholConsumptionRepository;
+    private final MeasureRepository measureRepository;
     private final CsvUtils csvUtils;
     private final XMLUtils xmlUtils;
     private final JSONUtils jsonUtils;
@@ -57,6 +66,25 @@ public class CountryService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void addData(CountryData data) {
+        Country country = countryRepository.findByCode(data.countryCode())
+                .orElse(
+                        countryRepository.save(new Country(null, data.countryCode()))
+                );
+        Measure measureAlcohol = measureRepository
+                .findByName(data.alcoholConsumptionData().measure())
+                .orElse(measureRepository.save(
+                        new Measure(null, data.alcoholConsumptionData().measure()))
+                );
+        Measure measureSuicide = measureRepository
+                .findByName(data.suicideRateData().measure())
+                .orElse(measureRepository.save(
+                        new Measure(null, data.suicideRateData().measure()))
+                );
+        suicideRateRepository.save(data.suicideRateData().toEntity(country, measureSuicide));
+        alcoholConsumptionRepository.save(data.alcoholConsumptionData().toEntity(country, measureAlcohol));
     }
 
 }

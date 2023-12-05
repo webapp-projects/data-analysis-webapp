@@ -10,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -32,6 +29,12 @@ public class CountryController {
     @GetMapping("")
     public ResponseEntity<List<Country>> getAll() {
         return ResponseEntity.ok(countryService.getAll());
+    }
+
+    @PostMapping("/data")
+    public ResponseEntity<?> insertData(@RequestBody CountryData data) {
+        countryService.addData(data);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/csv")

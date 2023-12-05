@@ -72,7 +72,7 @@ public class AuthenticationServiceTests {
         AuthenticationRequest authenticationRequest = new AuthenticationRequest("existinguser", "password");
         User existingUser = new User(1L, "existinguser", "existinguser@example.com", "encodedPassword", Role.USER);
         when(userRepository.findByLogin(authenticationRequest.getLogin())).thenReturn(java.util.Optional.of(existingUser));
-        Mockito.when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
         when(jwtService.generateToken(existingUser)).thenReturn("mockToken");
 
         // Act

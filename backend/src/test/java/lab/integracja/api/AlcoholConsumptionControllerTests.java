@@ -22,6 +22,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +56,9 @@ class AlcoholConsumptionControllerTests {
         when(countryService.isValidCountryCode(any())).thenReturn(true);
 
         mockMvc.perform(get("/api/alcohol/country/POL"))
-                .andExpect(status().is2xxSuccessful());
+                .andExpect(status().is2xxSuccessful())
+                .andDo(print())
+                .andExpect(content().string("[{\"id\":1,\"country\":null,\"subject\":null,\"measure\":null,\"time\":2,\"value\":2.5}]"));
     }
 
     @Test
